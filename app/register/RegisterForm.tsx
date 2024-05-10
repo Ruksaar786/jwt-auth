@@ -1,9 +1,10 @@
 "use client";
-
+import Link from "next/link";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-
+import axios from "axios";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -18,13 +19,14 @@ import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
   name: z.string().min(1, {
-    message: "Name is required",
+    message: "Name is required.",
   }),
   email: z.string().min(1, { message: "Email is required" }),
   password: z.string().min(6, { message: "Password is required" }),
 });
 
-export function ProfileForm() {
+export function RegisterForm() {
+  const router = useRouter();
   // 1. Define your form.
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -36,10 +38,13 @@ export function ProfileForm() {
   });
 
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    // Do something with the form values.
-    // ✅ This will be type-safe and validated.
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    try {
+      await axios.post("/api/register", values);
+      router.push("/login");
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   return (
@@ -50,12 +55,12 @@ export function ProfileForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Name</FormLabel>
               <FormControl>
                 <Input placeholder="name" {...field} />
               </FormControl>
               <FormDescription>
-                This is your public display Name.
+                This is your public display name.
               </FormDescription>
               <FormMessage />
             </FormItem>
@@ -70,7 +75,7 @@ export function ProfileForm() {
               <FormControl>
                 <Input placeholder="email" {...field} />
               </FormControl>
-              <FormDescription>This is your Email.</FormDescription>
+              <FormDescription>This is your email</FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -82,14 +87,18 @@ export function ProfileForm() {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input placeholder="password" {...field} />
+                <Input placeholder="Password" {...field} />
               </FormControl>
-              <FormDescription>This is your Password.</FormDescription>
+              <FormDescription>Password</FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button type="submit">Submit</Button>
+
+        <Button type="submit">Create New User</Button>
+        <div className="mt-2">
+          <Link href="/login">If you have account ? go to login page</Link>
+        </div>
       </form>
     </Form>
   );
